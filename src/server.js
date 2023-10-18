@@ -6,6 +6,7 @@ const books = require("./routes/books");
 const user = require("./routes/user");
 const product = require("./routes/product");
 const review = require("./routes/review");
+const logout = require("./routes/logout");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 
@@ -19,7 +20,20 @@ if (dotenvConfig.error) {
 }
 
 // Use the cors middleware options to configure which domains can be accessed
-app.use(cors());
+const corsOptions = {
+  credentials: true,
+  origin: function (origin, callback) {
+    //use a regex to allow your domain to include all sub-routes
+    if (/^http:\/\/localhost:5173/.test(origin)) {
+      callback(null, true);
+    } else {
+      console.log("CORS Blocked");
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
+app.use(cors(corsOptions));
 
 // allows req.body and req.query params able to be accessed
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -30,10 +44,10 @@ app.use(cookieParser());
 
 // runs anytime a request is made
 app.use((req, res, next) => {
-  console.log("+-----------------------------------------------+");
-  console.log(`Route '${req.path}' made a ${req.method} request`);
-  console.log("Time: " + new Date());
-  console.log("+-----------------------------------------------+");
+  console.log("+----------------------------------------------------+");
+  console.log(`| Route '${req.path}' made a ${req.method} request`);
+  console.log("| Time: " + new Date());
+  console.log("+----------------------------------------------------+");
 
   next();
 });
@@ -43,6 +57,7 @@ app.use("/api/books", books);
 app.use("/api/user", user);
 app.use("/api/product", product);
 app.use("/api/review", review);
+app.use("/api/logout", logout);
 
 //error handler for invalid routes
 app.get("*", (req, res) => {

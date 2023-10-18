@@ -62,7 +62,9 @@ const addProduct = async (req, res) => {
  * @access private
  */
 const getProduct = async (req, res) => {
-  const { title } = req.body;
+  // const { title } = req.body;
+  // <- use w thunder, req.query w axios
+  const { title } = req.query;
 
   try {
     // Search for a product with the given title in the 'products' collection

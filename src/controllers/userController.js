@@ -63,7 +63,7 @@ const loginUser = async (req, res) => {
   const user = await User.findOne({ email });
   //compare password
   if (user && (await bcrypt.compare(password, user.password))) {
-    const Token = jwt.sign(
+    const AccessToken = jwt.sign(
       {
         user: {
           username: user.username,
@@ -71,13 +71,30 @@ const loginUser = async (req, res) => {
           id: user.id,
         },
       },
-      process.env.TOKEN_SECRET,
-      { expiresIn: "1h" }
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "15m" }
     );
 
-    res.cookie("Token", Token, {
-      httpOnly: true, // Ensures the cookie is only accessible via HTTP(S) requests, not JavaScript
-      maxAge: 3600000, // 1 hour in milliseconds
+    res.cookie("AccessToken", AccessToken, {
+      httpOnly: true,
+      maxAge: 900000, // 15 min in milliseconds
+    });
+
+    const RefreshToken = jwt.sign(
+      {
+        user: {
+          username: user.username,
+          email: user.email,
+          id: user.id,
+        },
+      },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.cookie("RefreshToken", RefreshToken, {
+      httpOnly: true,
+      maxAge: 86400000, // 1 day in milliseconds
     });
 
     res.status(200).send({
@@ -94,6 +111,7 @@ const loginUser = async (req, res) => {
  * @access private
  */
 const currentUser = async (req, res) => {
+  // console.log(req);
   res.send({ user: req.user });
 };
 
