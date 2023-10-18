@@ -57,7 +57,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
   //error handling to avoid null values where values are mandatory
   if (!email || !password) {
-    res.status(400).send({ error: "All fields are required" });
+    res.status(400).json({ error: "All fields are required" });
   }
 
   const user = await User.findOne({ email });
@@ -101,7 +101,7 @@ const loginUser = async (req, res) => {
       user: { id: user.id, email: user.email, username: user.username },
     });
   } else {
-    res.status(401).send({ error: "Email or password is incorrect" });
+    res.status(401).json({ error: "Email or password is incorrect" });
   }
 };
 

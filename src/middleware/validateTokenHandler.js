@@ -18,7 +18,7 @@ const validateToken = async (req, res, next) => {
         //error handle for expired refresh token
         if (!RefreshToken) {
           console.log("Refresh Token is missing");
-          res.status(403).send({ error: "Refresh Token is missing" });
+          res.status(403).json({ error: "Refresh Token is missing" });
         }
 
         //verifying the refresh token
@@ -28,7 +28,7 @@ const validateToken = async (req, res, next) => {
           (err, decodedInfomation) => {
             if (err) {
               console.log("Refresh Token is invalid");
-              res.status(403).send("Refresh Token is invalid");
+              res.status(403).json("Refresh Token is invalid");
             }
             //generate a new access token
             console.log("generating new access token..");
