@@ -9,9 +9,14 @@ const review = require("./routes/review");
 const logout = require("./routes/logout");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
+const morgan = require("morgan");
+const helmet = require("helmet");
 
 // Initialize app
 const app = express();
+
+//change res headers to hide api stack
+app.use(helmet());
 
 // Set path to .env file and check for errors
 const dotenvConfig = dotenv.config();
@@ -43,14 +48,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 // runs anytime a request is made
-app.use((req, res, next) => {
-  console.log("+----------------------------------------------------+");
-  console.log(`| Route '${req.path}' made a ${req.method} request`);
-  console.log("| Time: " + new Date());
-  console.log("+----------------------------------------------------+");
-
-  next();
-});
+app.use(morgan("dev"));
 
 //routes
 app.use("/api/books", books);
@@ -72,7 +70,9 @@ mongoose
     // start and run server
     const PORT = process.env.SERVER_PORT;
     app.listen(PORT, () =>
-      console.log(`Express server listening on http://localhost:${PORT}/`)
+      console.log(
+        `*** Express server listening on http://localhost:${PORT}/ ***`
+      )
     );
   })
   .catch((err) => {
