@@ -115,4 +115,20 @@ const currentUser = async (req, res) => {
   res.send({ user: req.user });
 };
 
-module.exports = { registerUser, loginUser, currentUser };
+/**
+ * @desc get user info by ID
+ * @route GET api/user/getUserById
+ * @access private
+ */
+const userById = async (req, res) => {
+  const { id } = req.query;
+  try {
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: "No book found" });
+    res.status(200).send(user);
+  } catch (err) {
+    res.status(400).json({ error: err });
+  }
+};
+
+module.exports = { registerUser, loginUser, currentUser, userById };

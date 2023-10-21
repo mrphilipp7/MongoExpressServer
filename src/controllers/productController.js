@@ -38,7 +38,7 @@ const getReviewsForProduct = async (productId) => {
  * @access private
  */
 const addProduct = async (req, res) => {
-  const { title, price, category } = req.body;
+  const { title, price, category } = req.body.params;
   try {
     //create product
     const newProduct = await Product.create({
@@ -87,4 +87,51 @@ const getProduct = async (req, res) => {
   }
 };
 
-module.exports = { addProduct, getProduct };
+/**
+ * @desc get all products
+ * @route GET api/product/getAllProducts
+ * @access private
+ */
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find({}).sort({ title: -1 });
+    res.status(200).json({ products });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+/**
+ * @desc grab all products that contain a certain category
+ * @route GET api/product/getProductsByCategory
+ * @access private
+ */
+const getProductsByCategory = async (req, res) => {
+  const { category } = req.query;
+
+  if (!category) {
+    return res.status(400).json({ error: "No category was supplied" });
+  }
+
+  try {
+    const products = await Product.find({
+      category: { $in: [category.toLowerCase()] },
+    });
+    if (!products) {
+      // If no product with the given title is found, return an error response
+      return res
+        .status(404)
+        .json({ error: "No products with that category exist" });
+    }
+    res.status(200).send({ products });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+module.exports = {
+  addProduct,
+  getProduct,
+  getAllProducts,
+  getProductsByCategory,
+};
