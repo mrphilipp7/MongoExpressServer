@@ -48,7 +48,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 // runs anytime a request is made
-app.use(morgan("dev"));
+app.use(morgan("tiny"));
 
 //routes
 app.use("/api/books", books);
