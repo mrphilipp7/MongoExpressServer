@@ -27,8 +27,7 @@ const getReviewsForProduct = async (productId) => {
     return reviews;
   } catch (error) {
     // Handle errors if any
-    console.error(error);
-    throw new Error("Error fetching reviews for the product.");
+    return { error: "Error fetching reviews for the product." };
   }
 };
 
