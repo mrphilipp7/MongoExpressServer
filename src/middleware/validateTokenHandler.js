@@ -1,62 +1,63 @@
 const jwt = require("jsonwebtoken");
 
 /**
- * @desc middleware on auth required routes to validate access token and assign new one
+ * @desc middleware for validating httponly acces/refresh tokens
  */
 const validateToken = async (req, res, next) => {
   console.log("validating...");
   const AccessToken = req.cookies.AccessToken;
 
-  //verify the access token
-  jwt.verify(
-    AccessToken,
-    process.env.ACCESS_TOKEN_SECRET,
-    (err, decodedInfomation) => {
-      //access token as expired or is invalid
-      if (err) {
-        const RefreshToken = req.cookies.RefreshToken;
-        //error handle for expired refresh token
-        if (!RefreshToken) {
-          console.log("Refresh Token is missing");
-          res.status(403).json({ error: "Refresh Token is missing" });
-        }
+  try {
+    const decodedInfomation = jwt.verify(
+      AccessToken,
+      process.env.ACCESS_TOKEN_SECRET
+    );
 
-        //verifying the refresh token
-        jwt.verify(
-          RefreshToken,
-          process.env.REFRESH_TOKEN_SECRET,
-          (err, decodedInfomation) => {
-            if (err) {
-              console.log("Refresh Token is invalid");
-              res.status(403).json("Refresh Token is invalid");
-            }
-            //generate a new access token
-            console.log("generating new access token..");
-            const NewAccessToken = jwt.sign(
-              decodedInfomation,
-              process.env.ACCESS_TOKEN_SECRET
-            );
+    // If access token is valid, continue to the next middleware
+    req.user = decodedInfomation;
+    next();
+  } catch (err) {
+    const RefreshToken = req.cookies.RefreshToken;
 
-            console.log("new access token created..");
-
-            //new token is saved over old one
-            res.cookie("AccessToken", NewAccessToken, {
-              httpOnly: true,
-              maxAge: 900000, // 15 min in milliseconds
-            });
-
-            console.log("valid");
-            req.user = decodedInfomation;
-            next();
-          }
-        );
-      } else {
-        console.log("valid");
-        req.user = decodedInfomation;
-        next();
+    // Handle errors related to access token expiration or invalidity
+    if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+      if (!RefreshToken) {
+        console.log("Refresh Token is missing or invalid");
+        return res.status(403).json({
+          error: "Access Token and Refresh Token are invalid or expired",
+        });
       }
+
+      try {
+        const decodedRefreshToken = jwt.verify(
+          RefreshToken,
+          process.env.REFRESH_TOKEN_SECRET
+        );
+        console.log("generating new access token..");
+        const NewAccessToken = jwt.sign(
+          decodedRefreshToken,
+          process.env.ACCESS_TOKEN_SECRET
+        );
+        console.log("new access token created..");
+
+        // Save the new access token in the response cookie
+        res.cookie("AccessToken", NewAccessToken, {
+          httpOnly: true,
+          maxAge: 900000, // 15 min in milliseconds
+        });
+
+        req.user = decodedRefreshToken;
+        next();
+      } catch (refreshTokenError) {
+        console.log("Refresh Token is invalid");
+        return res.status(403).json({ error: "Refresh Token is invalid" });
+      }
+    } else {
+      // Handle other types of errors
+      console.error(err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-  );
+  }
 };
 
 module.exports = validateToken;
