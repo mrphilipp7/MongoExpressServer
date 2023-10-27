@@ -32,7 +32,6 @@ const corsOptions = {
     if (/^http:\/\/localhost:5173/.test(origin)) {
       callback(null, true);
     } else {
-      console.log("CORS Blocked");
       callback("Not allowed by CORS");
     }
   },
