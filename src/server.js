@@ -58,7 +58,7 @@ app.use("/api/logout", logout);
 
 //error handler for invalid routes
 app.get("*", (req, res) => {
-  res.send("ERROR: Invalid route");
+  res.status(400).json("ERROR: Invalid route");
 });
 
 //connect to db
