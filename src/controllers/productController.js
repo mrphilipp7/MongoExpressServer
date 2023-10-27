@@ -47,7 +47,6 @@ const addProduct = async (req, res) => {
       category,
       user_id: req.user.user.id,
     });
-    console.log("Created a new product");
     res.status(201).send(newProduct);
   } catch (err) {
     //catch mongoose errs pertaining to model

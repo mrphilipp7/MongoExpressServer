@@ -40,7 +40,6 @@ const addReview = async (req, res) => {
       review,
       rating,
     });
-    console.log(`Created a new review for the product ${product.title}`);
     res.status(201).send(newReview);
   } catch (err) {
     //catch mongoose errs pertaining to model

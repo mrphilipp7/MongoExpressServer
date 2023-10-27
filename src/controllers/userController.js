@@ -39,7 +39,6 @@ const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
     });
-    console.log("Successfully created a new user");
     res.status(201).send(newUser);
   } catch (err) {
     //catch mongoose errs pertaining to model
@@ -111,7 +110,6 @@ const loginUser = async (req, res) => {
  * @access private
  */
 const currentUser = async (req, res) => {
-  // console.log(req);
   res.send({ user: req.user });
 };
 

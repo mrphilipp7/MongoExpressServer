@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
  * @desc middleware for validating httponly acces/refresh tokens
  */
 const validateToken = async (req, res, next) => {
-  console.log("validating...");
   const AccessToken = req.cookies.AccessToken;
 
   try {
