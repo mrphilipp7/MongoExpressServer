@@ -1,6 +1,13 @@
 const Product = require("../models/productModel");
 const Review = require("../models/reviewModel");
 
+const validatePriceFormat = (value) => {
+  // Regular expression to make sure price is in USD format
+  const regex =
+    /^(?!0,?\d)(?:\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d{1,3}(?:\.\d{2})?|\d+(?:\.\d{2})?)$/;
+  return regex.test(value);
+};
+
 const handleErrors = (err) => {
   let errors = { title: "", price: "", rating: "", category: "" };
 
@@ -127,9 +134,50 @@ const getProductsByCategory = async (req, res) => {
   }
 };
 
+/**
+ * @desc filters search results to return products with price lower than param
+ * @route GET api/product/getProductsByPrice
+ * @access private
+ */
+const getProductsByPrice = async (req, res) => {
+  const { price } = req.query;
+
+  const isValidPrice = validatePriceFormat(price);
+  if (!isValidPrice)
+    return res.status(400).json({ error: "Not Valid USD Price Format" });
+
+  try {
+    // Parse the price from the query string to a floating-point number
+    const parsedPrice = parseFloat(price);
+
+    // Validate if the parsed price is a valid number
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      return res.status(400).json({ error: "Invalid price value." });
+    }
+
+    // Find products with price less than or equal to the provided price
+    const products = await Product.find({ price: { $lte: parsedPrice } });
+
+    // If no products are found, return an empty array
+    if (!products || products.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No products found within the given price range." });
+    }
+
+    // Respond with the found products
+    res.status(200).json({ products });
+  } catch (err) {
+    // Handle errors and return a 500 Internal Server Error response
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   addProduct,
   getProduct,
   getAllProducts,
   getProductsByCategory,
+  getProductsByPrice,
 };

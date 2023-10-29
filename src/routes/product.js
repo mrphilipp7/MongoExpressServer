@@ -5,6 +5,7 @@ const {
   getProduct,
   getAllProducts,
   getProductsByCategory,
+  getProductsByPrice,
 } = require("../controllers/productController");
 const validateToken = require("../middleware/validateTokenHandler");
 
@@ -15,5 +16,7 @@ router.get("/getProduct", validateToken, getProduct);
 router.get("/getAllProducts", validateToken, getAllProducts);
 
 router.get("/getProductsByCategory", validateToken, getProductsByCategory);
+
+router.get("/getProductsByPrice", validateToken, getProductsByPrice);
 
 module.exports = router;
